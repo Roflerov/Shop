@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ product.name }}</h1>
+    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="big-img">
+    <p>{{ product.description }}</p>
+    <p class="price big-price">{{ product.price }} ₽</p>
+    <button onclick="addToCart({{ product.id }})">Добавить в корзину</button>
+{% endblock %}

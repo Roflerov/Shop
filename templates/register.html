@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Регистрация</h1>
+            <p class="auth-subtitle">Создайте аккаунт, чтобы сохранять адрес доставки и историю заказов</p>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="username">Имя пользователя</label>
+                    <input type="text" id="username" placeholder="Придумайте логин" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" placeholder="Минимум 6 символов" required>
+                </div>
+
+                <!-- Добавлено поле адреса доставки (необязательное) -->
+                <div class="form-group">
+                    <label for="delivery_address">Адрес доставки (необязательно)</label>
+                    <input type="text" id="delivery_address" placeholder="Ваш адрес (будет сохранён после регистрации)">
+                </div>
+
+                <button type="button" onclick="register()" class="btn-primary">Зарегистрироваться</button>
+            </form>
+
+            <p class="auth-link">
+                Уже есть аккаунт? <a href="/login">Войти</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

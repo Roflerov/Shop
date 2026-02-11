@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="cart-page">
+        <h1>Ваша корзина</h1>
+
+        {% if cart_items %}
+            <div class="cart-items">
+                <ul class="cart-list">
+                    {% for item in cart_items %}
+                        <li class="cart-item">
+                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="cart-img">
+
+                            <div class="cart-item-info">
+                                <h3>{{ item.product.name }}</h3>
+                                <p class="desc">{{ item.product.description }}</p>
+
+                                <!-- Блок количества -->
+                                <div class="quantity-block">
+                                    <button class="qty-btn" onclick="updateQuantity({{ item.id }}, -1)">−</button>
+                                    <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" readonly>
+                                    <button class="qty-btn" onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                                </div>
+
+                                <p class="price">{{ item.product.price }} ₽ / шт.</p>
+                            </div>
+
+                            <div class="cart-item-total">
+                                {{ item.quantity * item.product.price }} ₽
+                            </div>
+
+                            <button class="remove-btn" onclick="removeFromCart({{ item.id }})">Удалить</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Остальной блок итого остаётся без изменений -->
+            <div class="cart-summary">
+                <div class="summary-card">
+                    <h2>Оформление заказа</h2>
+
+                    <div class="total-section">
+                        <div class="total-line">
+                            <span>Сумма товаров:</span>
+                            <span>{{ total_price }} ₽</span>
+                        </div>
+                        <div class="total-line grand-total">
+                            <span>Итого к оплате:</span>
+                            <span>{{ total_price }} ₽</span>
+                        </div>
+                    </div>
+
+                    <div class="delivery-section">
+                        <label for="delivery_address">Куда доставить?</label>
+                        <input type="text" id="delivery_address" placeholder="Улица, дом, квартира"
+                               {% if current_user and current_user.delivery_address %}value="{{ current_user.delivery_address }}"{% endif %}>
+                        <small class="hint">Если вы авторизованы, адрес можно сохранить для следующих заказов</small>
+                    </div>
+
+                    <button class="pay-btn" onclick="checkout()">Оплатить и оформить</button>
+
+                    <p class="note">Это симуляция оплаты — корзина очистится после нажатия</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-cart">
+                <h2>Корзина пуста</h2>
+                <p>Добавьте товары из каталога, чтобы оформить заказ</p>
+                <a href="/" class="btn-primary">Перейти в каталог</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

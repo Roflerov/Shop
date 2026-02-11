@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин — Доставка от 15 минут</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">🛒 Магазин</a>
+
+        <form action="/" method="get" class="search-form">
+            <input type="text" name="search" placeholder="Искать товары..." value="{{ search_query }}">
+            <button type="submit">🔍</button>
+        </form>
+
+        <nav>
+            {% if current_user %}
+                <span>Привет, {{ current_user.username }}</span>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            {% else %}
+                <a href="/login">Войти</a> | <a href="/register">Регистрация</a>
+            {% endif %}
+            <a href="#" onclick="goToCart()" class="cart-link">Корзина</a>
+        </nav>
+    </header>
+
+    <div class="container {% if request.url.path in ['/login', '/register', '/cart'] %}centered{% else %}with-sidebar{% endif %}">
+        {% if request.url.path not in ['/login', '/register', '/cart'] %}
+        <aside class="sidebar">
+            <h3>Категории</h3>
+            <ul>
+                {% for cat in categories %}
+                    <li>
+                        <a href="/?category_id={{ cat.id }}"
+                           class="{% if selected_category_id == cat.id %}active{% endif %}">
+                            {{ cat.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
+        {% endif %}
+
+        <main class="{% if request.url.path in ['/login', '/register', '/cart'] %}auth-main{% else %}content-main{% endif %}">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="/static/js/script.js?v=2"></script>
+
+    <!-- Модальное окно продукта -->
+    <div id="product-modal" class="modal" style="display:none;" aria-hidden="true">
+        <div class="modal-backdrop" onclick="closeProductModal()"></div>
+        <div class="modal-card" role="dialog" aria-modal="true">
+            <div class="modal-inner">
+                <button class="modal-close" onclick="closeProductModal()" aria-label="Закрыть">×</button>
+                <div class="modal-body modal-portrait">
+                    <div class="modal-media">
+                        <img id="modal-image" src="" alt="" />
+                    </div>
+
+                    <div class="modal-info">
+                     <h2 id="modal-title"></h2>
+
+                     <div class="modal-price-row">
+                         <span id="modal-price" class="modal-price"></span>
+                     </div>
+
+                     <p id="modal-desc" class="desc"></p>
+
+                     <div class="modal-kbju" id="modal-kbju" aria-hidden="false"></div>
+
+                     <div class="modal-actions">
+                         <div class="quantity-control">
+                             <button class="qty-btn" id="modal-qty-decr" aria-label="Уменьшить">−</button>
+                             <input id="modal-qty" class="qty-input" type="number" min="1" value="1" />
+                             <button class="qty-btn" id="modal-qty-incr" aria-label="Увеличить">+</button>
+                         </div>
+                         <button class="btn-primary btn-add" id="modal-add-btn">Добавить в корзину</button>
+                     </div>
+                 </div>
+
+                </div>
+            </div>
+         </div>
+     </div>
+ </body>
+ </html>

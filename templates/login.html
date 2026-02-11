@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Вход</h1>
+            <p class="auth-subtitle">Войдите в свой аккаунт</p>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Имя пользователя</label>
+                    <input type="text" id="username" placeholder="Ваш логин" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" placeholder="Ваш пароль" required>
+                </div>
+
+                <button type="button" onclick="login()" class="btn-primary">Войти</button>
+            </form>
+
+            <p class="auth-link">
+                Нет аккаунта? <a href="/register">Зарегистрироваться</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}
