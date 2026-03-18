@@ -31,6 +31,18 @@
         <aside class="sidebar">
             <h3>Категории</h3>
             <ul>
+                <li>
+                    <a href="/?feed=popular"
+                       class="{% if selected_feed == 'popular' %}active{% endif %}">
+                        Популярное
+                    </a>
+                </li>
+                <li>
+                    <a href="/?feed=recommended"
+                       class="{% if selected_feed == 'recommended' %}active{% endif %}">
+                        Рекомендуем вам
+                    </a>
+                </li>
                 {% for cat in categories %}
                     <li>
                         <a href="/?category_id={{ cat.id }}"

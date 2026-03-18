@@ -6,4 +6,19 @@
     <p>{{ product.description }}</p>
     <p class="price big-price">{{ product.price }} ₽</p>
     <button onclick="addToCart({{ product.id }})">Добавить в корзину</button>
+
+    {% if also_buy %}
+        <h2>С этим часто берут</h2>
+        <div class="products-grid rec-grid">
+            {% for item in also_buy %}
+                <div class="product-card" data-product-id="{{ item.id }}">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                    <h3><a href="/products/{{ item.id }}">{{ item.name }}</a></h3>
+                    <p class="desc">Похоже по категории и КБЖУ</p>
+                    <p class="price">{{ item.price }} ₽</p>
+                    <button onclick="addToCart({{ item.id }}, 1, 'product_also_buy', {{ product.id }})">В корзину</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 {% endblock %}

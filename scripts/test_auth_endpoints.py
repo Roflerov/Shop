@@ -26,8 +26,8 @@ with SessionLocal() as db:
 r = client.post("/users/register", json={"username": username, "password": password})
 print('register status', r.status_code, r.text)
 
-# Логин через JSON endpoint
-r = client.post("/users/login", json={"username": username, "password": password})
+# Логин через OAuth2 form endpoint
+r = client.post("/users/login", data={"username": username, "password": password})
 print('login status', r.status_code, r.text)
 
 # Получаем /users/me используя cookie, TestClient сохранит куки автоматически

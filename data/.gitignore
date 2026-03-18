@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.db
+.idea/
+venv/
+.env
+token.json

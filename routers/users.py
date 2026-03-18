@@ -28,30 +28,12 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Пользователь зарегистрирован"}
 
 
-@router.post("/token", response_model=Token)
+@router.post('/login', response_model=Token)
 def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Неверный логин или пароль")
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    # Установим cookie с токеном (HttpOnly)
-    response.set_cookie(key="access_token", value=access_token, httponly=True, max_age=60*60*24, path="/")
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-# Новый упрощённый маршрут для JS/fetch — принимает JSON {username, password}
-@router.post('/login', response_model=Token)
-def login_json(payload: dict, response: Response, db: Session = Depends(get_db)):
-    username = payload.get('username')
-    password = payload.get('password')
-    if not username or not password:
-        raise HTTPException(status_code=400, detail='username и password обязательны')
-    user = authenticate_user(db, username, password)
-    if not user:
         raise HTTPException(status_code=401, detail='Неверный логин или пароль')
+
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
     response.set_cookie(key='access_token', value=access_token, httponly=True, max_age=60*60*24, path='/')

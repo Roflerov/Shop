@@ -14,6 +14,38 @@ else:
 
 cur = conn.cursor()
 
+# Явная миграция таблиц истории заказов
+cur.execute(
+    """
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER NULL,
+        session_id TEXT NULL,
+        status TEXT NOT NULL DEFAULT 'created',
+        total REAL NOT NULL DEFAULT 0,
+        delivery_address TEXT NULL,
+        created_at INTEGER NOT NULL
+    )
+    """
+)
+cur.execute(
+    """
+    CREATE TABLE IF NOT EXISTS order_items (
+        id INTEGER PRIMARY KEY,
+        order_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        unit_price REAL NOT NULL DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        FOREIGN KEY(order_id) REFERENCES orders(id) ON DELETE CASCADE,
+        FOREIGN KEY(product_id) REFERENCES products(id)
+    )
+    """
+)
+
+# Backfill истории заказов: пока пустой по требованиям
+print('Backfill order history: skipped (empty by design)')
+
 # Список подстрок -> имя категории
 mapping = {
     'Мандари': 'Овощи и фрукты',

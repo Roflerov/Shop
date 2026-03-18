@@ -35,3 +35,10 @@ typing_extensions==4.15.0
 uvicorn==0.40.0
 watchfiles==1.1.1
 websockets==16.0
+
+# optional ML deps
+scikit-learn>=1.2.0
+rapidfuzz>=2.0.0
+pandas>=2.2.0
+numpy>=1.26.0
+ctgan>=0.10.2

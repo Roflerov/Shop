@@ -8,6 +8,10 @@
 
     {% if search_query %}
         <h2>Результаты поиска: "{{ search_query }}"</h2>
+    {% elif selected_feed == 'popular' %}
+        <h2>Популярное</h2>
+    {% elif selected_feed == 'recommended' %}
+        <h2>Рекомендуем вам</h2>
     {% else %}
         <h2>Товары</h2>
     {% endif %}
@@ -19,7 +23,13 @@
                 <h3><a href="/products/{{ product.id }}">{{ product.name }}</a></h3>
                 <p class="desc">{{ product.description }}</p>
                 <p class="price">{{ product.price }} ₽</p>
-                <button onclick="addToCart({{ product.id }})">В корзину</button>
+                {% if selected_feed == 'popular' %}
+                    <button onclick="addToCart({{ product.id }}, 1, 'home_popular')">В корзину</button>
+                {% elif selected_feed == 'recommended' %}
+                    <button onclick="addToCart({{ product.id }}, 1, 'home_recommended')">В корзину</button>
+                {% else %}
+                    <button onclick="addToCart({{ product.id }})">В корзину</button>
+                {% endif %}
             </div>
         {% endfor %}
 

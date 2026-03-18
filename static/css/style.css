@@ -283,6 +283,10 @@ nav a:hover {
     gap: 20px;
 }
 
+.rec-grid {
+    margin-bottom: 28px;
+}
+
 .product-card {
     background: white;
     border-radius: 16px;

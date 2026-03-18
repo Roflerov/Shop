@@ -30,11 +30,22 @@ window.categoriesMap = {};
     }catch(e){console.warn('Не удалось загрузить категории',e)}
 })();
 
-async function addToCart(productId, quantity=1) {
+async function addToCart(productId, quantity=1, recSource=null, recOriginProductId=null) {
     const data = { product_id: productId, quantity: quantity };
     const sid = getSessionId();
+    const extra = new URLSearchParams();
+    if (recSource) {
+        extra.set('rec_source', recSource);
+    }
+    if (recOriginProductId) {
+        extra.set('rec_origin_product_id', recOriginProductId);
+    }
+    const extraQuery = extra.toString();
+    const url = extraQuery
+        ? `/cart/?session_id=${sid}&${extraQuery}`
+        : `/cart/?session_id=${sid}`;
     try {
-        const res = await fetch(`/cart/?session_id=${sid}`, {
+        const res = await fetch(url, {
             method: "POST",
             headers: getHeaders(),
             credentials: 'same-origin',
@@ -76,10 +87,10 @@ async function checkout() {
         alert("Введите адрес доставки");
         return;
     }
-    const data = { delivery_address: address };
+    const data = { delivery_address: address, status: "created" };
     const sid = getSessionId();
     try {
-        const res = await fetch(`/cart/checkout/?session_id=${sid}`, {
+        const res = await fetch(`/api/orders/?session_id=${sid}`, {
             method: "POST",
             headers: getHeaders(),
             credentials: 'same-origin',
@@ -104,11 +115,14 @@ async function login() {
     if (!username || !password) return alert("Заполните поля");
 
     try {
+        const form = new URLSearchParams();
+        form.append("username", username);
+        form.append("password", password);
         const res = await fetch("/users/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             credentials: 'same-origin',
-            body: JSON.stringify({ username, password }),
+            body: form.toString(),
         });
         const data = await res.json();
         if (res.ok && data.access_token) {
