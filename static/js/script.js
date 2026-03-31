@@ -34,6 +34,7 @@ async function addToCart(productId, quantity=1, recSource=null, recOriginProduct
     const data = { product_id: productId, quantity: quantity };
     const sid = getSessionId();
     const extra = new URLSearchParams();
+    extra.set('session_id', sid);
     if (recSource) {
         extra.set('rec_source', recSource);
     }
@@ -41,9 +42,7 @@ async function addToCart(productId, quantity=1, recSource=null, recOriginProduct
         extra.set('rec_origin_product_id', recOriginProductId);
     }
     const extraQuery = extra.toString();
-    const url = extraQuery
-        ? `/cart/?session_id=${sid}&${extraQuery}`
-        : `/cart/?session_id=${sid}`;
+    const url = extraQuery ? `/cart/?${extraQuery}` : `/cart/`;
     try {
         const res = await fetch(url, {
             method: "POST",
@@ -65,7 +64,7 @@ async function addToCart(productId, quantity=1, recSource=null, recOriginProduct
 async function removeFromCart(itemId) {
     const sid = getSessionId();
     try {
-        const res = await fetch(`/cart/${itemId}?session_id=${sid}`, {
+        const res = await fetch(`/cart/${itemId}?session_id=${encodeURIComponent(sid)}`, {
             method: "DELETE",
             headers: getHeaders(),
             credentials: 'same-origin',
@@ -165,8 +164,8 @@ async function register() {
     }
 }
 function goToCart() {
-    const sid = getSessionId();  // функция уже есть в твоём script.js
-    window.location.href = `/cart?session_id=${sid}`;
+    const sid = getSessionId();
+    window.location.href = `/cart?session_id=${encodeURIComponent(sid)}`;
 }
 // Автокомплит адреса с Yandex Geosuggest
 const suggestInput = document.querySelector('.suggest-input');
@@ -231,10 +230,10 @@ document.addEventListener('click', (e) => {
 });
 
 async function updateQuantity(itemId, change) {
-    const sid = getSessionId();
     const qtyInput = event.target.parentElement.querySelector('.qty-input');
     let currentQty = parseInt(qtyInput.value);
     let newQty = currentQty + change;
+    const sid = getSessionId();
 
     if (newQty < 1) newQty = 1;
 

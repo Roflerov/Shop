@@ -94,7 +94,16 @@ def cart_recommendations(
     current_user: Optional[User] = Depends(get_current_user_or_none),
     db: Session = Depends(get_db),
 ):
-    cart_items = get_cart(current_user=current_user, session_id=session_id, db=db)
+    if current_user:
+        cart_items = get_cart(current_user=current_user, db=db)
+    else:
+        if not session_id:
+            return RecommendationBlockOut(
+                placement="cart_complete_order",
+                products=[],
+            )
+        cart_items = get_cart(current_user=None, session_id=session_id, db=db)
+
     recs = service.get_cart_recs(db, cart_items=cart_items, limit=6)
     return RecommendationBlockOut(
         placement="cart_complete_order",

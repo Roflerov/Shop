@@ -37,12 +37,14 @@
                         Популярное
                     </a>
                 </li>
-                <li>
-                    <a href="/?feed=recommended"
-                       class="{% if selected_feed == 'recommended' %}active{% endif %}">
-                        Рекомендуем вам
-                    </a>
-                </li>
+                {% if current_user %}
+                    <li>
+                        <a href="/?feed=recommended"
+                           class="{% if selected_feed == 'recommended' %}active{% endif %}">
+                            Рекомендуем вам
+                        </a>
+                    </li>
+                {% endif %}
                 {% for cat in categories %}
                     <li>
                         <a href="/?category_id={{ cat.id }}"

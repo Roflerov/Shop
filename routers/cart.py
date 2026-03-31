@@ -63,13 +63,16 @@ def add_to_cart(
     rec_origin_product_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
-    # Определяем, по какому полю ищем существующую запись
     if current_user:
         filter_field = CartItem.user_id == current_user.id
+        rec_user_id = current_user.id
+        rec_session_id = None
     else:
         if not session_id:
-            raise HTTPException(status_code=400, detail="Для неавторизованных нужен session_id")
+            raise HTTPException(400, "session_id обязателен для гостя")
         filter_field = CartItem.session_id == session_id
+        rec_user_id = None
+        rec_session_id = session_id
 
     # Ищем существующую запись с таким же product_id
     existing_item = (
@@ -92,8 +95,8 @@ def add_to_cart(
                 placement=rec_source,
                 event_type="add_to_cart",
                 product_id=item.product_id,
-                user_id=current_user.id if current_user else None,
-                session_id=session_id,
+                user_id=rec_user_id,
+                session_id=rec_session_id,
                 source_product_id=rec_origin_product_id,
             )
             db.commit()
@@ -116,8 +119,8 @@ def add_to_cart(
                 placement=rec_source,
                 event_type="add_to_cart",
                 product_id=item.product_id,
-                user_id=current_user.id if current_user else None,
-                session_id=session_id,
+                user_id=rec_user_id,
+                session_id=rec_session_id,
                 source_product_id=rec_origin_product_id,
             )
             db.commit()
@@ -130,12 +133,12 @@ def get_cart(
     session_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
+    base_query = db.query(CartItem).join(Product, Product.id == CartItem.product_id)
     if current_user:
-        return db.query(CartItem).filter(CartItem.user_id == current_user.id).all()
-    else:
-        if not session_id:
-            raise HTTPException(400, "Для неавторизованных нужен session_id")
-        return db.query(CartItem).filter(CartItem.session_id == session_id).all()
+        return base_query.filter(CartItem.user_id == current_user.id).all()
+    if not session_id:
+        raise HTTPException(400, "session_id обязателен для гостя")
+    return base_query.filter(CartItem.session_id == session_id).all()
 
 
 @router.delete("/{item_id}")
@@ -145,20 +148,14 @@ def delete_cart_item(
     session_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
+    query = db.query(CartItem).filter(CartItem.id == item_id)
     if current_user:
-        item = (
-            db.query(CartItem)
-            .filter(CartItem.id == item_id, CartItem.user_id == current_user.id)
-            .first()
-        )
+        query = query.filter(CartItem.user_id == current_user.id)
     else:
         if not session_id:
-            raise HTTPException(400, "session_id обязателен")
-        item = (
-            db.query(CartItem)
-            .filter(CartItem.id == item_id, CartItem.session_id == session_id)
-            .first()
-        )
+            raise HTTPException(400, "session_id обязателен для гостя")
+        query = query.filter(CartItem.session_id == session_id)
+    item = query.first()
     if not item:
         raise HTTPException(404, "Элемент не найден")
     db.delete(item)
@@ -175,19 +172,21 @@ def checkout(
 ):
     if current_user:
         address = checkout_data.delivery_address or current_user.delivery_address
-        if checkout_data.delivery_address:
-            current_user.delivery_address = checkout_data.delivery_address
-            db.commit()
-        items = db.query(CartItem).filter(CartItem.user_id == current_user.id).all()
+    else:
+        address = checkout_data.delivery_address
+    if current_user and checkout_data.delivery_address:
+        current_user.delivery_address = checkout_data.delivery_address
+        db.commit()
+
+    cart_query = db.query(CartItem).join(Product, Product.id == CartItem.product_id)
+    if current_user:
+        items = cart_query.filter(CartItem.user_id == current_user.id).all()
         user_id = current_user.id
         guest_session_id = None
     else:
         if not session_id:
-            raise HTTPException(400, "session_id обязателен")
-        address = checkout_data.delivery_address
-        if not address:
-            raise HTTPException(400, "Адрес обязателен для гостей")
-        items = db.query(CartItem).filter(CartItem.session_id == session_id).all()
+            raise HTTPException(400, "session_id обязателен для гостя")
+        items = cart_query.filter(CartItem.session_id == session_id).all()
         user_id = None
         guest_session_id = session_id
 
@@ -235,20 +234,14 @@ def update_cart_item(
 ):
     item_id = data.item_id
     new_quantity = data.quantity
-    session_id = data.session_id
-
+    query = db.query(CartItem).filter(CartItem.id == item_id)
     if current_user:
-        item = db.query(CartItem).filter(
-            CartItem.id == item_id,
-            CartItem.user_id == current_user.id
-        ).first()
+        query = query.filter(CartItem.user_id == current_user.id)
     else:
-        if not session_id:
-            raise HTTPException(400, "session_id обязателен")
-        item = db.query(CartItem).filter(
-            CartItem.id == item_id,
-            CartItem.session_id == session_id
-        ).first()
+        if not data.session_id:
+            raise HTTPException(400, "session_id обязателен для гостя")
+        query = query.filter(CartItem.session_id == data.session_id)
+    item = query.first()
 
     if not item:
         raise HTTPException(404, "Элемент не найден")

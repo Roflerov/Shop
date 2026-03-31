@@ -72,7 +72,7 @@ def create_order_from_cart(
         delivery_address=payload.delivery_address,
     )
 
-    cart_query = db.query(CartItem)
+    cart_query = db.query(CartItem).join(Product, Product.id == CartItem.product_id)
     if user_id is not None:
         cart_items = cart_query.filter(CartItem.user_id == user_id).all()
     else:

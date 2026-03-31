@@ -3,6 +3,7 @@ import sqlite3
 import time
 import os
 from fastapi import FastAPI, Depends, Request, Query, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -200,6 +201,8 @@ async def index(
     categories = []
     products = []
     selected_feed = feed if feed in {"popular", "recommended"} else None
+    if selected_feed == "recommended" and not current_user:
+        selected_feed = None
 
     for attempt in range(3):
         try:
@@ -315,7 +318,10 @@ async def cart_page(
 ):
     from routers.cart import get_cart  # late import to avoid circular
 
-    cart_items = get_cart(current_user=current_user, session_id=session_id, db=db)
+    if current_user or session_id:
+        cart_items = get_cart(current_user=current_user, session_id=session_id, db=db)
+    else:
+        cart_items = []
     total_price = sum(item.product.price * item.quantity for item in cart_items)
     complete_order_recs = rec_service.get_cart_recs(db, cart_items=cart_items, limit=6)
     if complete_order_recs:
